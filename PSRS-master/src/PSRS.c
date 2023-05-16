@@ -184,15 +184,21 @@ int main (int argc, char *argv[])
     }
 
     // output sorting result :
-//    if (rank == 0)
-//    {
-//        for (i = 0; i < n; i++)
-//            printf (" i = %2ld \t %ld \n", i, a_all[i]);
-//    }
+   if (rank == 0)
+   {
+       for (i = 0; i < n; i++)
+           printf (" i = %2ld \t %ld \n", i, a_all[i]);
+   }
 
     // free memory :
+
     if (rank == 0)
     {
+        // for (i = 0; i < 100; i++)
+        // {
+        //     printf("element %ld\n", a_all[i]);
+        // }
+
         free (a_all);
         free (samples_all);
         free (t_all);
