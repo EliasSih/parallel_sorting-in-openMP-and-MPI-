@@ -21,59 +21,67 @@ void calc_partition_borders(long long array[],
 void psrs_sort(long long *a, int n);
 void sortll(long long *a, int len);
 
-//This is a function to read data from a file
-long long * read_in(char filename[], int * ptr2size)
+// int main(int argc, char *argv[])
+//{
+// int n, i;
+// long long *a;
+
+// Get the size of the array from the command line argument
+// if(argc < 2){
+// printf("Usage: %s <array size>\n", argv[0]);
+// return 1;
+//}
+// n = atoi(argv[1]);
+
+// Allocate memory for the array
+// a = (long long*) malloc(n * sizeof(long long));
+
+// Initialize the array with random values
+// srand(12345);
+// for(i=0; i<n; i++){
+// a[i] = rand();
+//}
+
+// Call the psrs_sort function to sort the array
+// double start_time = omp_get_wtime();
+// psrs_sort(a, n);
+// double end_time = omp_get_wtime();
+
+// Print the sorted array and timing information
+// printf("Sorted array:\n");
+// for (i=0; i<n; i++){
+// printf("%lld\n", a[i]);
+//}
+// printf("Elapsed time =  %f seconds\n", end_time - start_time);
+
+// Free memory
+// free(a);
+
+// return 0;
+
+// Function to generate a random array
+void generate_random_array(long long *arr, int size)
 {
-  const int max_line = 1024;
-  char line[max_line];
-  int i;
-  FILE * file;
-  char * eof;
-  long long * a;
-  int size;
-
-  /* open the file */
-  file = fopen(filename, "r");
-  if ( file == NULL ) {
-    fprintf(stderr, "File not found: %s\n", filename);
-    exit(1);
+  FILE *file = fopen("input.txt", "r");
+  if (file == NULL)
+  {
+    printf("Failed to open the file.\n");
+    return;
   }
 
-  /* read in the size of the array to allocate */
-  eof = fgets(line, max_line, file);
-  if ( eof == NULL ) {
-    fprintf(stderr, "Empty file: %s\n", filename);
-    exit(1);
-  }
-  sscanf(line, "%d", &size);
-  a = (long long int *)malloc(sizeof(long long) * size);
-  //Perform operations with the current array size
-  printf("Array size: %d\n", size);
-
-  /* read in the long longs - one per line */
-  i = 0;
-  eof = fgets(line, max_line, file);
-  while ( eof != NULL && i < size ) {     /* eof == NULL => end of file */
-    sscanf(line, "%lld", &(a[i]));
+  int i = 0;
+  long long num;
+  char delimiter;
+  while (fscanf(file, "%lld%c", &num, &delimiter) == 2 && i < size)
+  {
+    arr[i] = num;
     i++;
-    eof = fgets(line, max_line, file);
+
+    if (delimiter == '\n')
+      break;
   }
 
   fclose(file);
-  *ptr2size = size;
-
-  return a;
-}
-
-// Function to generate a random array
-void generate_random_array(long long *a, int size)
-{
-  int i;
-  srand(time(NULL));
-  for (i = 0; i < size; i++)
-  {
-    a[i] = rand() % (100 * size);
-  }
 }
 
 // Function to print an array
@@ -86,26 +94,55 @@ void print_array(long long *arr, int size)
   }
   printf("\n");
 }
+//}
+int main(int argc, char **argv)
+{
+  int n = 35; // size of array
+  long long *a = (long long *)malloc(n * sizeof(long long));
+  double start_time, end_time;
 
-/* sort an array in ascending order */
+  // Generate a random array of size n
+  generate_random_array(a, n);
+
+  // Print the unsorted array
+  printf("Unsorted array: ");
+  print_array(a, n);
+
+  // Sort the array using PSRS sort
+  start_time = omp_get_wtime();
+  psrs_sort(a, n);
+  end_time = omp_get_wtime();
+
+  // Print the aorted array
+  printf("Sorted array: ");
+  print_array(a, n);
+
+  // Print the time taken to sort the array
+  printf("Time taken: %lf seconds\n", end_time - start_time);
+
+  // Free the memory allocated for the array
+  free(a);
+
+  return 0;
+}
+
+/* sort an array in non-descending order */
 void psrs_sort(long long *a, int n)
 {
   if (n > 1)
   {
-    //if (n <= 55)
-    //{
-      // If n<=1 then it skips the insertion sort and moves to the next
+    if (n <= 55)
+    {
       // Testing shows that sequential insertion sort is quickest when n <= 55 (approx.)
-    //  insertion_sort(a, n);
-    //}
-    //else if (n <= 10000)
-    //{
-      // If n<=2 it skips the merge sort
+      insertion_sort(a, n);
+    }
+    else if (n <= 10000)
+    {
       // Testing shows that sequential merge sort is quickest when n <= 10000(approx.)
-     // merge_sort(a, n);
-    //}
-    //else
-    //{
+      merge_sort(a, n);
+    }
+    else
+    {
       // Testing shows that our algorithm is now the quickest
       int p, size, rsize, sample_size;
       long long *sample, *pivots;
@@ -126,7 +163,6 @@ void psrs_sort(long long *a, int n)
         p = omp_get_max_threads();
         p -= p % 2;
       }
-      printf("Threads: %d\n", omp_get_max_threads());
       omp_set_num_threads(p);
 
       size = (n + p - 1) / p;
@@ -254,7 +290,7 @@ void psrs_sort(long long *a, int n)
       free(bucket_sizes);
       free(result_positions);
       free(pivots);
-    //}
+    }
   }
 }
 
@@ -425,43 +461,3 @@ void insertion_sort(long long *arr, int n)
     }
   }
 }
-
-int main(int argc, char **argv)
-{
-  //int n =10; // size of array
-  int array_size;
-  long long *a = (long long *)malloc(array_size * sizeof(long long));
-  double start_time, end_time;
-
-
-  if ( argc == 3 && !strcmp(argv[1], "-f") ) { /* read data from file */
-    char * filename = argv[2];
-    a = read_in(filename, &array_size);
-  }
-  
- 
-  // Generate a random array of size n
-  generate_random_array(a, array_size);
-
-  // Print the unsorted array
-  printf("Unsorted array: ");
-  print_array(a, array_size);
-
-  // Sort the array using PSRS sort
-  start_time = omp_get_wtime();
-  psrs_sort(a, array_size);
-  end_time = omp_get_wtime();
-
-  // Print the sorted array
-  printf("Sorted array: ");
-  print_array(a, array_size);
-
-  // Print the time taken to sort the array
-  printf("Time taken: %lf seconds\n", end_time - start_time);
-
-  // Free the memory allocated for the array
-  free(a);
-
-  return 0;
-}
-
