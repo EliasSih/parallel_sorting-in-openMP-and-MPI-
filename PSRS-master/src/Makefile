@@ -1,11 +1,11 @@
 
 CC := mpicc
 
-PSRS : PSRS.o
-	$(CC) -o PSRS PSRS.o
+PSRS : mpiVersion.o
+	$(CC) -o mpiVersion mpiVersion.o
 
 PSRS.o : PSRS.c
-	$(CC) -c PSRS.c -o PSRS.o
+	$(CC) -c mpiVersion.c -o mpiVersion.o
 
 clean :
-	-rm -f PSRS *.o
+	-rm -f mpiVersion *.o
