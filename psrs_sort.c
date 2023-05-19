@@ -59,8 +59,8 @@ void sortll(long long *a, int len);
 
 // return 0;
 
-// Function to generate a random array
-void generate_random_array(long long *arr, int size)
+// reading input stream from imput file
+void readFromFile(long long *arr, int size)
 {
   FILE *file = fopen("input.txt", "r");
   if (file == NULL)
@@ -101,8 +101,8 @@ int main(int argc, char **argv)
   long long *a = (long long *)malloc(n * sizeof(long long));
   double start_time, end_time;
 
-  // Generate a random array of size n
-  generate_random_array(a, n);
+  // reading input stream from imput file
+  readFromFile(a, n);
 
   // Print the unsorted array
   printf("Unsorted array: ");
