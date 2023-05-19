@@ -4,22 +4,139 @@
 #include <omp.h>
 #include <time.h>
 
-#define MAX_VALUE 100
+#include <string.h>
 
-// Function to compare two elements
+#define MAX_VALUE 10000
+#define MAX_THREADS 4
+
 int compare(const void *a, const void *b)
 {
     return (*(int *)a - *(int *)b);
 }
 
-// Function to sort array in parallel using OpenMP
+// Helper function to find the upper bound in an array
+int upper_bound(int *array, int n, int value)
+{
+    int l = 0, r = n;
+    while (l < r)
+    {
+        int mid = l + (r - l) / 2;
+        if (array[mid] <= value)
+        {
+            l = mid + 1;
+        }
+        else
+        {
+            r = mid;
+        }
+    }
+    return l;
+}
+
 void parallel_sort(int *array, int n)
 {
-#pragma omp parallel for
-    for (int i = 0; i < n; ++i)
+    int num_threads, i, *samples, *splitters;
+    int segment_size, sample_distance;
+
+    omp_set_num_threads(MAX_THREADS);
+    num_threads = omp_get_max_threads();
+    segment_size = n / num_threads;
+    sample_distance = segment_size / num_threads;
+
+    samples = malloc(num_threads * num_threads * sizeof(int));
+    splitters = malloc((num_threads - 1) * sizeof(int));
+
+    if (!samples || !splitters)
     {
-        qsort(array + i, 1, sizeof(int), compare);
+        fprintf(stderr, "Failed to allocate memory\n");
+        exit(1);
     }
+
+    // Local sort
+#pragma omp parallel for
+    for (i = 0; i < num_threads; ++i)
+    {
+        qsort(array + i * segment_size, segment_size, sizeof(int), compare);
+    }
+
+    // Regular sampling
+#pragma omp parallel for
+    for (i = 0; i < num_threads; ++i)
+    {
+        int j;
+        for (j = 0; j < num_threads; ++j)
+        {
+            samples[i * num_threads + j] = array[i * segment_size + j * sample_distance];
+        }
+    }
+
+    // Reordering at root
+    qsort(samples, num_threads * num_threads, sizeof(int), compare);
+    for (i = 0; i < num_threads - 1; ++i)
+    {
+        splitters[i] = samples[(i + 1) * num_threads];
+    }
+
+    // Globally exchange
+    int **buckets = malloc(num_threads * sizeof(int *));
+    int *bucket_sizes = calloc(num_threads, sizeof(int));
+
+    if (!buckets || !bucket_sizes)
+    {
+        fprintf(stderr, "Failed to allocate memory\n");
+        exit(1);
+    }
+
+    for (i = 0; i < num_threads; ++i)
+    {
+        buckets[i] = calloc(n, sizeof(int));
+        if (!buckets[i])
+        {
+            fprintf(stderr, "Failed to allocate memory\n");
+            exit(1);
+        }
+    }
+
+#pragma omp parallel for
+    for (i = 0; i < num_threads; ++i)
+    {
+        int j;
+        for (j = 0; j < segment_size; ++j)
+        {
+            int elem = array[i * segment_size + j];
+            int idx = upper_bound(splitters, num_threads - 1, elem); // Find bucket for elem
+            if (idx < num_threads)
+            {
+                buckets[idx][bucket_sizes[idx]++] = elem;
+            }
+        }
+    }
+
+    // Local sort again
+#pragma omp parallel for
+    for (i = 0; i < num_threads; ++i)
+    {
+        qsort(buckets[i], bucket_sizes[i], sizeof(int), compare);
+    }
+
+    // Concatenate buckets
+    int offset = 0;
+    for (i = 0; i < num_threads; ++i)
+    {
+        memcpy(array + offset, buckets[i], bucket_sizes[i] * sizeof(int));
+        offset += bucket_sizes[i];
+    }
+
+    // Cleanup
+    for (i = 0; i < num_threads; ++i)
+    {
+        free(buckets[i]);
+    }
+
+    free(buckets);
+    free(bucket_sizes);
+    free(splitters);
+    free(samples);
 }
 
 // Function to merge two subarrays
