@@ -25,6 +25,28 @@
 // Function : input parameter for qsort (sort integer)
 //
 //================================================================================
+
+void readFromFile(long *arr, int size)
+{
+    FILE *file = fopen("input.txt", "r");
+    if (file == NULL)
+    {
+        printf("Failed to open the file.\n");
+        return;
+    }
+
+    int i = 0;
+    long long num;
+    char delimiter;
+    while (fscanf(file, "%lld%c", &num, &delimiter) == 2 && i < size)
+    {
+        arr[i] = num;
+        i++;
+    }
+
+    fclose(file);
+}
+
 int cmp (const void *a, const void *b)
 {
     return (*(int *)a - *(int *)b);
@@ -38,7 +60,7 @@ int main (int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
-    long n = atol (argv[1]);                            // size of array
+    int n = atol (argv[1]);                            // size of array
     long *a_all = NULL;                                 // array a
 
     long i, j, k;
@@ -54,15 +76,13 @@ int main (int argc, char *argv[])
     if (rank == 0)
     {
         a_all = (long *)calloc (n, sizeof (long));
-        assert (a_all != NULL);
+        // assert (a_all != NULL);
 
-        srand (time (NULL));
-        for (i = 0; i < n; i++)
-            a_all[i] = rand ();
+        // srand (time (NULL));
+        // for (i = 0; i < n; i++)
+        //     a_all[i] = rand ();
 
-//        a_all[0] = 15; a_all[1] = 46; a_all[2] = 48; a_all[3] = 93; a_all[4] = 39; a_all[5] = 6; a_all[6] = 72; a_all[7] = 91; a_all[8] = 14;
-//        a_all[9] = 36; a_all[10] = 69; a_all[11] = 40; a_all[12] = 89; a_all[13] = 61; a_all[14] = 97; a_all[15] = 12; a_all[16] = 21; a_all[17] = 54;
-//        a_all[18] = 53; a_all[19] = 97; a_all[20] = 84; a_all[21] = 58; a_all[22] = 32; a_all[23] = 27; a_all[24] = 33; a_all[25] = 72; a_all[26] = 20;
+        readFromFile(a_all, n);
     }
 
     // begin clock :

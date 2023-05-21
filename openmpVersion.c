@@ -21,45 +21,6 @@ void calc_partition_borders(long long array[],
 void psrs_sort(long long *a, int n);
 void sortll(long long *a, int len);
 
-// int main(int argc, char *argv[])
-//{
-// int n, i;
-// long long *a;
-
-// Get the size of the array from the command line argument
-// if(argc < 2){
-// printf("Usage: %s <array size>\n", argv[0]);
-// return 1;
-//}
-// n = atoi(argv[1]);
-
-// Allocate memory for the array
-// a = (long long*) malloc(n * sizeof(long long));
-
-// Initialize the array with random values
-// srand(12345);
-// for(i=0; i<n; i++){
-// a[i] = rand();
-//}
-
-// Call the psrs_sort function to sort the array
-// double start_time = omp_get_wtime();
-// psrs_sort(a, n);
-// double end_time = omp_get_wtime();
-
-// Print the sorted array and timing information
-// printf("Sorted array:\n");
-// for (i=0; i<n; i++){
-// printf("%lld\n", a[i]);
-//}
-// printf("Elapsed time =  %f seconds\n", end_time - start_time);
-
-// Free memory
-// free(a);
-
-// return 0;
-
-// reading input stream from imput file
 void readFromFile(long long *arr, int size)
 {
   FILE *file = fopen("input.txt", "r");
@@ -76,9 +37,6 @@ void readFromFile(long long *arr, int size)
   {
     arr[i] = num;
     i++;
-
-    if (delimiter == '\n')
-      break;
   }
 
   fclose(file);
@@ -97,7 +55,7 @@ void print_array(long long *arr, int size)
 //}
 int main(int argc, char **argv)
 {
-  int n = 35; // size of array
+  int n = atoi(argv[1]); // size of array
   long long *a = (long long *)malloc(n * sizeof(long long));
   double start_time, end_time;
 

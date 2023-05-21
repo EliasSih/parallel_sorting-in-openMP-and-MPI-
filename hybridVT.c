@@ -9,6 +9,30 @@
 #define MAX_VALUE 10000
 #define MAX_THREADS 4
 
+
+// read data stream from text file into array
+
+void readFromFile(int *arr, int size)
+{
+    FILE *file = fopen("input.txt", "r");
+    if (file == NULL)
+    {
+        printf("Failed to open the file.\n");
+        return;
+    }
+
+    int i = 0;
+    long long num;
+    char delimiter;
+    while (fscanf(file, "%lld%c", &num, &delimiter) == 2 && i < size)
+    {
+        arr[i] = num;
+        i++;
+    }
+
+    fclose(file);
+}
+
 int compare(const void *a, const void *b)
 {
     return (*(int *)a - *(int *)b);
@@ -213,14 +237,8 @@ int main(int argc, char **argv)
     int array_size = atoi(argv[1]);
     int *data = malloc(array_size * sizeof(int));
 
-    // Generate random data
-    if (rank == 0)
-    {
-        for (int i = 0; i < array_size; ++i)
-        {
-            data[i] = rand() % MAX_VALUE;
-        }
-    }
+    // reading input stream from imput file
+    readFromFile(data, array_size);
 
     // Start timing
     double start_time = MPI_Wtime();
