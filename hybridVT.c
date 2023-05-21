@@ -3,14 +3,10 @@
 #include <mpi.h>
 #include <omp.h>
 #include <time.h>
-
 #include <string.h>
 
 #define MAX_VALUE 10000
 #define MAX_THREADS 4
-
-
-// read data stream from text file into array
 
 void readFromFile(int *arr, int size)
 {
@@ -38,7 +34,6 @@ int compare(const void *a, const void *b)
     return (*(int *)a - *(int *)b);
 }
 
-// Helper function to find the upper bound in an array
 int upper_bound(int *array, int n, int value)
 {
     int l = 0, r = n;
@@ -76,14 +71,12 @@ void parallel_sort(int *array, int n)
         exit(1);
     }
 
-    // Local sort
 #pragma omp parallel for
     for (i = 0; i < num_threads; ++i)
     {
         qsort(array + i * segment_size, segment_size, sizeof(int), compare);
     }
 
-    // Regular sampling
 #pragma omp parallel for
     for (i = 0; i < num_threads; ++i)
     {
@@ -94,14 +87,12 @@ void parallel_sort(int *array, int n)
         }
     }
 
-    // Reordering at root
     qsort(samples, num_threads * num_threads, sizeof(int), compare);
     for (i = 0; i < num_threads - 1; ++i)
     {
         splitters[i] = samples[(i + 1) * num_threads];
     }
 
-    // Globally exchange
     int **buckets = malloc(num_threads * sizeof(int *));
     int *bucket_sizes = calloc(num_threads, sizeof(int));
 
@@ -128,22 +119,20 @@ void parallel_sort(int *array, int n)
         for (j = 0; j < segment_size; ++j)
         {
             int elem = array[i * segment_size + j];
-            int idx = upper_bound(splitters, num_threads - 1, elem); // Find bucket for elem
-            if (idx < num_threads)
+            int idx = upper_bound(splitters, num_threads - 1, elem);
+#pragma omp critical
             {
                 buckets[idx][bucket_sizes[idx]++] = elem;
             }
         }
     }
 
-    // Local sort again
 #pragma omp parallel for
     for (i = 0; i < num_threads; ++i)
     {
         qsort(buckets[i], bucket_sizes[i], sizeof(int), compare);
     }
 
-    // Concatenate buckets
     int offset = 0;
     for (i = 0; i < num_threads; ++i)
     {
@@ -151,7 +140,6 @@ void parallel_sort(int *array, int n)
         offset += bucket_sizes[i];
     }
 
-    // Cleanup
     for (i = 0; i < num_threads; ++i)
     {
         free(buckets[i]);
@@ -163,7 +151,6 @@ void parallel_sort(int *array, int n)
     free(samples);
 }
 
-// Function to merge two subarrays
 void merge(int *array, int left, int mid, int right)
 {
     int i, j, k;
@@ -213,7 +200,6 @@ void merge(int *array, int left, int mid, int right)
     free(R);
 }
 
-// Function to perform merge sort on array
 void merge_sort(int *array, int left, int right)
 {
     if (left < right)
@@ -233,44 +219,34 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Parse array size from command line arguments
     int array_size = atoi(argv[1]);
     int *data = malloc(array_size * sizeof(int));
 
-    // reading input stream from imput file
     readFromFile(data, array_size);
 
-    // Start timing
     double start_time = MPI_Wtime();
 
-    // Distribute data among processes
     MPI_Scatter(data, array_size / size, MPI_INT, data, array_size / size, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Each process sorts its own data
     parallel_sort(data, array_size / size);
 
-    // Gather sorted subarrays into the root process
     MPI_Gather(data, array_size / size, MPI_INT, data, array_size / size, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Root process merges sorted subarrays
     if (rank == 0)
     {
         merge_sort(data, 0, array_size - 1);
-    }
-
-    // End timing and print time taken
-    double end_time = MPI_Wtime();
-    if (rank == 0)
-    {
-        printf("Time taken: %f seconds\n", end_time - start_time);
+        printf("Time taken: %f seconds\n", MPI_Wtime() - start_time);
 
         // Print the sorted array
+        printf("Sorted array:\n");
         for (int i = 0; i < array_size; i++)
         {
             printf("%d ", data[i]);
         }
         printf("\n");
     }
+
+    free(data);
 
     MPI_Finalize();
     return 0;

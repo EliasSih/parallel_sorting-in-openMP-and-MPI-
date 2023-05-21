@@ -10,11 +10,10 @@
 # clean :
 # 	-rm -f mpiVersion *.o
 
-
 CC := mpicc
 GCC := gcc
 
-all: PSRS ompV
+all: PSRS ompV hybrid
 
 PSRS: mpiVersion.o
 	$(CC) -o mpiVersion mpiVersion.o 
@@ -27,8 +26,14 @@ ompV: openmpVersion.o
 
 openmpVersion.o: openmpVersion.c
 	$(GCC) -c openmpVersion.c -o openmpVersion.o -fopenmp -lm
+
+hybrid: hybridVT.o
+	$(CC) -o hybridVT hybridVT.o -fopenmp -lm
+
+hybridVT.o: hybridVT.c
+	$(CC) -c hybridVT.c -o hybridVT.o -fopenmp -lm
 	
 clean:
-	-rm -f mpiVersion openmpVersion *.o
+	-rm -f hybridVT mpiVersion openmpVersion *.o
 
 
