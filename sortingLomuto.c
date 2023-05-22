@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
     double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
     //Print the sorted array
-    //printf("Sorted array: \n");
-    //for (int i = 0; i < n; i++)
+    // printf("Sorted array: \n");
+    // for (int i = 0; i < n; i++)
     //    printf("%lld ", arr[i]);
     printf("%f", time_taken);
 

@@ -63,17 +63,17 @@ int main(int argc, char **argv)
   readFromFile(a, n);
 
   // Print the unsorted array
-  printf("Unsorted array: ");
-  print_array(a, n);
+  // printf("Unsorted array: ");
+  // print_array(a, n);
 
   // Sort the array using PSRS sort
   start_time = omp_get_wtime();
   psrs_sort(a, n);
   end_time = omp_get_wtime();
 
-  // Print the aorted array
-  printf("Sorted array: ");
-  print_array(a, n);
+  // Print the sorted array
+  // printf("Sorted array: ");
+  // print_array(a, n);
 
   // Print the time taken to sort the array
   printf("Time taken: %lf seconds\n", end_time - start_time);

@@ -238,12 +238,12 @@ int main(int argc, char **argv)
         printf("Time taken: %f seconds\n", MPI_Wtime() - start_time);
 
         // Print the sorted array
-        printf("Sorted array:\n");
-        for (int i = 0; i < array_size; i++)
-        {
-            printf("%d ", data[i]);
-        }
-        printf("\n");
+        // printf("Sorted array:\n");
+        // for (int i = 0; i < array_size; i++)
+        // {
+        //     printf("%d ", data[i]);
+        // }
+        // printf("\n");
     }
 
     free(data);
