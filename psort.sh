@@ -7,7 +7,7 @@ input_sizes=(10 100 1000)
 num_processes=4
 
 # programs to run
-programs=(mpiVersion hybridVT sortingHoare sortingLomuto)
+programs=(mpiVersion openmpVersion hybridVT sortingHoare sortingLomuto)
 
 for program in "${programs[@]}"
 do
@@ -23,6 +23,10 @@ do
       then
         # run the mpi program and get the result
         result=$(mpirun -np "$num_processes" "./$program" "$size")
+      elif [ "$program" == "openmpVersion" ]
+      then
+        # run the openmp program and get the result
+        result=$("./$program" "$size" -fopenmp)
       else
         # run the sorting program and get the result
         result=$("./$program" "$size")
