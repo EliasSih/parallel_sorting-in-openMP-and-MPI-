@@ -13,7 +13,25 @@
 CC := mpicc
 GCC := gcc
 
-all: PSRS ompV hybrid
+all: lomuto hoare sequential PSRS ompV hybrid
+
+lomuto: lomuto.o
+	$(GCC) -o lomuto lomuto.o
+
+lomuto.o: sortingLomuto.c
+	$(GCC) -c sortingLomuto.c -o lomuto.o
+
+hoare: hoare.o
+	$(GCC) -o hoare hoare.o
+
+hoare.o: sortingHoare.c
+	$(GCC) -c sortingHoare.c -o hoare.o
+
+sequential: sorting.o
+	$(GCC) -o sorting sorting.o 
+
+sorting.o: sorting.c
+	$(GCC) -c sorting.c -o sorting.o 
 
 PSRS: mpiVersion.o
 	$(CC) -o mpiVersion mpiVersion.o 
@@ -34,6 +52,6 @@ hybridVT.o: hybridVT.c
 	$(CC) -c hybridVT.c -o hybridVT.o -fopenmp -lm
 	
 clean:
-	-rm -f hybridVT mpiVersion openmpVersion *.o
+	-rm -f lomuto hoare sorting hybridVT mpiVersion openmpVersion *.o
 
 
