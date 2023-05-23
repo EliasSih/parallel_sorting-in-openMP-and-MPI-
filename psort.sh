@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # define the input sizes
-input_sizes=(10 100 1000)
+input_sizes=(10 100 1000 10000 100000 1000000)
 
 # define the number of processes
 num_processes=4
