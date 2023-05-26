@@ -5,8 +5,7 @@
 #include <time.h>
 #include <string.h>
 
-#define MAX_VALUE 10000
-#define MAX_THREADS 4
+#define MAX_THREADS 4 
 
 void readFromFile(int *arr, int size)
 {
@@ -52,12 +51,13 @@ int upper_bound(int *array, int n, int value)
     return l;
 }
 
-void parallel_sort(int *array, int n)
+void parallel_sort(int *array, int n, int max_threads)
 {
+    // printf("%d threads\n", max_threads);
     int num_threads, i, *samples, *splitters;
     int segment_size, sample_distance;
 
-    omp_set_num_threads(MAX_THREADS);
+    omp_set_num_threads(max_threads);
     num_threads = omp_get_max_threads();
     segment_size = n / num_threads;
     sample_distance = segment_size / num_threads;
@@ -228,14 +228,15 @@ int main(int argc, char **argv)
 
     MPI_Scatter(data, array_size / size, MPI_INT, data, array_size / size, MPI_INT, 0, MPI_COMM_WORLD);
 
-    parallel_sort(data, array_size / size);
+    parallel_sort(data, array_size / size, atoi(argv[2]));
 
     MPI_Gather(data, array_size / size, MPI_INT, data, array_size / size, MPI_INT, 0, MPI_COMM_WORLD);
 
     if (rank == 0)
     {
         merge_sort(data, 0, array_size - 1);
-        printf("Time taken: %f seconds\n", MPI_Wtime() - start_time);
+        // print time taken 
+        printf("%f",MPI_Wtime() - start_time);
 
         // Print the sorted array
         // printf("Sorted array:\n");

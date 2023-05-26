@@ -1,16 +1,4 @@
 
-//*********************************************************************************
-//
-// Filename : 'PSRS.c'
-//
-// Function : Parallel sorting by regular sampling (using quick sort for local sorting)
-//
-// Author : Xingzhong Li
-//
-// Date : 2018/05
-//
-//*********************************************************************************
-
 # define NDEBUG
 # include <stdio.h>
 # include <stdlib.h>
@@ -18,13 +6,6 @@
 # include <time.h>
 # include <mpi.h>
 
-//================================================================================
-// 
-// Function name : cmp
-//
-// Function : input parameter for qsort (sort integer)
-//
-//================================================================================
 
 void readFromFile(long *arr, int size)
 {
@@ -76,12 +57,7 @@ int main (int argc, char *argv[])
     if (rank == 0)
     {
         a_all = (long *)calloc (n, sizeof (long));
-        // assert (a_all != NULL);
-
-        // srand (time (NULL));
-        // for (i = 0; i < n; i++)
-        //     a_all[i] = rand ();
-
+        
         readFromFile(a_all, n);
     }
 
@@ -200,7 +176,7 @@ int main (int argc, char *argv[])
             if (t_max < t_all[i]) 
                 t_max = t_all[i];
         }
-        printf ("\n t_max = %lf \n", t_max);
+        printf ("\n  %lf \n", t_max);
     }
 
     // output sorting result :

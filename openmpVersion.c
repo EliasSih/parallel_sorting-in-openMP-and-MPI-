@@ -18,7 +18,7 @@ void calc_partition_borders(long long array[],
                             long long pivots[],
                             int first_p,
                             int last_p);
-void psrs_sort(long long *a, int n);
+void psrs_sort(long long *a, int n, int threads);
 void sortll(long long *a, int len);
 
 void readFromFile(long long *arr, int size)
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 
   // Sort the array using PSRS sort
   start_time = omp_get_wtime();
-  psrs_sort(a, n);
+  psrs_sort(a, n, atoi(argv[2]));
   end_time = omp_get_wtime();
 
   // Print the sorted array
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
   // print_array(a, n);
 
   // Print the time taken to sort the array
-  printf("Time taken: %lf seconds\n", end_time - start_time);
+  printf("%f", end_time - start_time);
 
   // Free the memory allocated for the array
   free(a);
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 }
 
 /* sort an array in non-descending order */
-void psrs_sort(long long *a, int n)
+void psrs_sort(long long *a, int n, int threads)
 {
   if (n > 1)
   {
@@ -109,7 +109,7 @@ void psrs_sort(long long *a, int n)
 
       // Determine the appropriate number of threads to use
       // p^3 <= n - We need this to hold true
-      p = omp_get_max_threads();
+      p = threads;
       p = p * p * p;
       if (p > n)
       {
@@ -118,7 +118,7 @@ void psrs_sort(long long *a, int n)
       }
       else
       {
-        p = omp_get_max_threads();
+        p = threads;
         p -= p % 2;
       }
       omp_set_num_threads(p);
